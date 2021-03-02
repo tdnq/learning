@@ -1,0 +1,4 @@
+*.out
+*.exe
+node_moudles/*
+.vscode
