@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .one{
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            text-align: center;
+        }
+        .red{
+            background-color: red;
+        }
+        .green{
+            background-color: green;
+        }
+        .yellow{
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="one red">one</div>
+    </main>
+
+    <script type="text/javascript">
+        (function(){
+            function changeStatus(){
+                tar.classList.remove(statusColor[curStatus]);
+                if(curStatus===2){
+                    curStatus=0;
+                }else{
+                    curStatus++;
+                }
+                tar.classList.add(statusColor[curStatus]);
+                setTimeout(changeStatus,second[curStatus]*100);
+            }
+            let curStatus=0,
+            tar=document.querySelector(".one"),
+            status=[0,1,2],
+            second=[5,10,2],
+            statusColor={0:"red",1:"green",2:"yellow"};
+            setTimeout(changeStatus,second[curStatus]*100);
+        })();
+
+        //best method:async/await
+    </script>
+</body>
+</html>
