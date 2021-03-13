@@ -1,4 +1,4 @@
 *.out
 *.exe
-node_moudles/*
+node_modules/*
 .vscode
