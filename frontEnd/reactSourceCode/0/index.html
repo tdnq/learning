@@ -1,16 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
     <div id="root">
 
     </div>
     <script src="../../../node_modules/react/umd/react.development.js"></script>
     <script src="../../../node_modules/react-dom/umd/react-dom.development.js"></script>
-    <script src="./index.js"></script>
+    <!-- <script src="../../../node_modules/react/jsx-dev-runtime.js"></script> -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script type="text/babel">
+        'use strict';
+        function Hello() {
+            return (<h1>hello</h1>);
+        }
+        const domContainer = document.querySelector('#root');
+        ReactDOM.render(<Hello/>, domContainer);
+    </script>
 </body>
+
 </html>
