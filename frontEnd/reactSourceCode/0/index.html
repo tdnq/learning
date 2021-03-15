@@ -30,22 +30,28 @@
             const ref=React.createRef();
             // return <Hello ref={ref}/>;
             return <React.Fragment>
-                <div>fa</div>
-                <div>ti</div>
+                <Input/>
                 </React.Fragment>
         }
         class Input extends React.Component{
             constructor(props){
                 super(props);
                 this.ref=React.createRef();
+                this.state={a:1,b:2};
             }
             render(){
-                console.log(this.ref);
-                return <input ref={ this.ref } type="text"/>
+                console.log(this.state);
+                return <div>
+                    <h1>a:{this.state.a};b:{this.state.b}</h1>
+                    <button onClick={
+                        ()=>{this.setState({a:this.state.a+1})}
+                    }>add a</button>
+                    <button onClick={()=>{this.setState({b:this.state.b+1})}}>add b</button>
+                    </div>
             }
             componentDidMount(){
-                this.ref.current.value="hello";
-                console.log(this.ref);
+                // this.ref.current.value="hello";
+                console.log(this.state);
             }
         }
         const domContainer = document.querySelector('#root');
