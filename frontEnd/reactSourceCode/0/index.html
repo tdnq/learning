@@ -17,11 +17,39 @@
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script type="text/babel">
         'use strict';
-        function Hello() {
-            return (<h1>hello</h1>);
+        const Hello=React.forwardRef(
+           function(props,ref) {
+               const[name,setName]=React.useState(0);
+            return (<h1 ref={ref}>
+                {name}
+                <input value={name} onChange={(e)=>{setName(e.target.value)}}/>
+                </h1>); 
+        }
+        ) 
+        function App(){
+            const ref=React.createRef();
+            // return <Hello ref={ref}/>;
+            return <React.Fragment>
+                <div>fa</div>
+                <div>ti</div>
+                </React.Fragment>
+        }
+        class Input extends React.Component{
+            constructor(props){
+                super(props);
+                this.ref=React.createRef();
+            }
+            render(){
+                console.log(this.ref);
+                return <input ref={ this.ref } type="text"/>
+            }
+            componentDidMount(){
+                this.ref.current.value="hello";
+                console.log(this.ref);
+            }
         }
         const domContainer = document.querySelector('#root');
-        ReactDOM.render(<Hello/>, domContainer);
+        ReactDOM.render(<App/>, domContainer);
     </script>
 </body>
 
