@@ -2,3 +2,8 @@
 *.exe
 node_modules/*
 .vscode
+
+#os files
+*.img
+*.bin
+bochsout.txt
