@@ -1,4 +1,4 @@
-%include "./include/boot.inc"
+%include "include/boot/boot.inc"
 section loader vstart=LOADER_BASE_ADDR
 LOADER_STACK_TOP equ LOADER_BASE_ADDR
 ; 这里其实就是GDT的起始地址，第一个描述符为空

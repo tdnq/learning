@@ -1,6 +1,6 @@
 ; 主引导程序
 ; ----------------------
-%include "./include/boot.inc"
+%include "include/boot/boot.inc"
 SECTION MBR vstart=0x7c00 ; 此处等号左右不能有空格出现，不然编译不通过
 	; 保存主要寄存器内容
 	mov ax, cs
