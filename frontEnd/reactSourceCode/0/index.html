@@ -17,45 +17,91 @@
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script type="text/babel">
         'use strict';
-        const Hello=React.forwardRef(
-           function(props,ref) {
-               const[name,setName]=React.useState(0);
-            return (<h1 ref={ref}>
-                {name}
-                <input value={name} onChange={(e)=>{setName(e.target.value)}}/>
-                </h1>); 
-        }
-        ) 
-        function App(){
-            const ref=React.createRef();
-            // return <Hello ref={ref}/>;
-            return <React.Fragment>
-                <Input/>
-                </React.Fragment>
-        }
-        class Input extends React.Component{
-            constructor(props){
-                super(props);
-                this.ref=React.createRef();
-                this.state={a:1,b:2};
+        const Hello = React.forwardRef(
+            function (props, ref) {
+                const [name, setName] = React.useState(0);
+                return (<h1 ref={ref}>
+                    {name}
+                    <input value={name} onChange={(e) => { setName(e.target.value) }} />
+                </h1>);
             }
-            render(){
+        )
+        const Ctx = React.createContext();
+        function App() {
+            const ref = React.createRef();
+            const inputRef = React.createRef();
+            return <React.Fragment>
+                <React.Suspense fallback="loading">
+                    <Input forwardRef={inputRef} />
+                    <Example ref={ref} />
+                    <Ctx.Provider value={123}>
+                        <TasteSuspense />
+                    </Ctx.Provider>
+                </React.Suspense>
+            </React.Fragment>
+        }
+        function TasteRef() {
+            const ref = React.createRef();
+            return (
+                <div ref={ref}>fa</div>
+            )
+        }
+        class Input extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { a: 1, b: 2 };
+            }
+            render() {
                 console.log(this.state);
                 return <div>
-                    <h1>a:{this.state.a};b:{this.state.b}</h1>
+                    <h1 ref={this.props.forwardRef}>a:{this.state.a};b:{this.state.b}</h1>
                     <button onClick={
-                        ()=>{this.setState({a:this.state.a+1})}
+                        () => { this.setState({ a: this.state.a + 1 }) }
                     }>add a</button>
-                    <button onClick={()=>{this.setState({b:this.state.b+1})}}>add b</button>
-                    </div>
+                    <button onClick={() => { this.setState({ b: this.state.b + 1 }) }}>add b</button>
+                </div>
             }
-            componentDidMount(){
+            componentDidMount() {
                 // this.ref.current.value="hello";
                 console.log(this.state);
             }
         }
+        const Example = React.forwardRef(function (props, ref) {
+            const [count, setCount] = React.useState(0);
+            // Similar to componentDidMount and componentDidUpdate:
+            React.useEffect(() => {
+                // Update the document title using the browser API
+                document.title = `You clicked ${count} times`;
+                console.log("example ref", ref);
+            }, []);
+            return (
+                <div>
+                    <p ref={ref}>You clicked {count} times</p>
+                    <button onClick={() => setCount(count + 1)}>
+                        Click me
+                    </button>
+                </div>
+            );
+        })
+        //context
+        function TasteCtx(props) {
+            return (
+                <Ctx.Consumer>
+                    { ctx => {
+                        return <div>component TasteCtx's context is {ctx}</div>
+                    }
+                    }
+                </Ctx.Consumer>
+            )
+        }
+        //suspense
+        function TasteSuspense(props) {
+            return <React.Suspense fallback="loading">
+                <TasteCtx />
+            </React.Suspense>
+        }
         const domContainer = document.querySelector('#root');
-        ReactDOM.render(<App/>, domContainer);
+        ReactDOM.render(<App />, domContainer);
     </script>
 </body>
 
