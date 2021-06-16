@@ -13,3 +13,4 @@
 2. chrome devtools
 ## methods
 1. compress resources(everything)
+2. reduce reflow or repaint(more GPU paint)
