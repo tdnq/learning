@@ -2,7 +2,7 @@
 *.exe
 node_modules/*
 .vscode
-
+build
 #os files
 *.img
 *.bin
