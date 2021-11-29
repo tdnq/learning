@@ -50,7 +50,22 @@ Eigen::Matrix4f get_model_matrix(float angle)
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float zNear, float zFar)
 {
     // TODO: Use the same projection matrix from the previous assignments
+    Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
+    eye_fov = MY_PI / 180 * eye_fov;
 
+    // TODO: Implement this function
+    // Create the projection matrix for the given parameters.
+    // Then return it.
+    float t = -std::abs(zNear) * std::tan(eye_fov / 2);
+    float b = -t;
+    float r = t * aspect_ratio;
+    float l = -r;
+    float n = zNear, f = zFar;
+    projection << 2 * n / (r - l), 0, (r + l) / (r - l), 0,
+        0, 2 * n / (t - b), (t + b) / (t - b), 0,
+        0, 0, (n + f) / (n - f), 2 * f * n / (f - n),
+        0, 0, 1, 0;
+    return projection;
 }
 
 Eigen::Vector3f vertex_shader(const vertex_shader_payload& payload)
@@ -247,10 +262,10 @@ int main(int argc, const char** argv)
 
     std::string filename = "output.png";
     objl::Loader Loader;
-    std::string obj_path = "../models/spot/";
+    std::string obj_path = "/home/nq/Documents/projects/learning/computerGraphics/src/games101/assignments/3/models/spot/";
 
     // Load .obj File
-    bool loadout = Loader.LoadFile("../models/spot/spot_triangulated_good.obj");
+    bool loadout = Loader.LoadFile("/home/nq/Documents/projects/learning/computerGraphics/src/games101/assignments/3/models/spot/spot_triangulated_good.obj");
     for (auto mesh : Loader.LoadedMeshes)
     {
         for (int i = 0;i < mesh.Vertices.size();i += 3)
