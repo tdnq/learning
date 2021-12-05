@@ -209,8 +209,6 @@ Eigen::Vector3f displacement_fragment_shader(const fragment_shader_payload& payl
     Eigen::Vector3f amb_light_intensity{ 10, 10, 10 };
     Eigen::Vector3f eye_pos{ 0, 0, 10 };
 
-    float p = 150;
-
     Eigen::Vector3f color = payload.color;
     Eigen::Vector3f point = payload.view_pos;
     Eigen::Vector3f normal = payload.normal;
@@ -227,21 +225,54 @@ Eigen::Vector3f displacement_fragment_shader(const fragment_shader_payload& payl
     // Vector ln = (-dU, -dV, 1)
     // Position p = p + kn * n * h(u,v)
     // Normal n = normalize(TBN * ln)
+    Eigen::Vector3f n = normal;
+    float x = n.x(), y = n.y(), z = n.z();
+    Eigen::Vector3f t(x * y / sqrt(x * x + z * z), sqrt(x * x + z * z), z * y / sqrt(x * x + z * z));
+    Eigen::Vector3f b = n.cross(t);
+    Eigen::Matrix3f TBN;
+    TBN.col(0) = t;
+    TBN.col(1) = b;
+    TBN.col(2) = n;
 
+    int w = payload.texture->width;
+    int h = payload.texture->height;
+    float u = payload.tex_coords.x();
+    float v = payload.tex_coords.y();
+
+    auto huv = payload.texture->getColor(u, v).norm();
+    float dU = kh * kn * (payload.texture->getColor(u + 1.0f / w, v).norm() - huv);
+    float dV = kh * kn * (payload.texture->getColor(u, v + 1.0f / h).norm() - huv);
+
+    Vector3f ln(-dU, -dV, 1);
+    // Vector3f temp = TBN.cross(ln).normalized();
+    Vector3f p = point + (Vector3f)(TBN * ln).normalized() * huv * kn;
 
     Eigen::Vector3f result_color = { 0, 0, 0 };
 
     for (auto& light : lights)
     {
+        Eigen::Vector3f v = (eye_pos - p).normalized();
+        Eigen::Vector3f specular(0, 0, 0);
+        Eigen::Vector3f ambient(0, 0, 0);
+        Eigen::Vector3f diffuse(0, 0, 0);
         // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
         // components are. Then, accumulate that result on the *result_color* object.
+        Eigen::Vector3f l = (light.position - p).normalized();
+        Eigen::Vector3f h = (v + l).normalized();
+        float rr = (light.position - p).squaredNorm();
 
-
+        for (int i = 0;i < 3;i++) {
+            specular[i] = ks[i] * (light.intensity[i] / rr) * std::pow(std::max((float)0.0, (float)normal.dot(h)), 150);
+            ambient[i] = ka[i] * amb_light_intensity[i];
+            diffuse[i] = kd[i] * (light.intensity[i] / rr) * std::max((float)0, normal.dot(l));
+        }
+        result_color += diffuse;
+        result_color += ambient;
+        result_color += specular;
     }
 
     return result_color * 255.f;
 }
-
 
 Eigen::Vector3f bump_fragment_shader(const fragment_shader_payload& payload)
 {
@@ -276,9 +307,26 @@ Eigen::Vector3f bump_fragment_shader(const fragment_shader_payload& payload)
     // Vector ln = (-dU, -dV, 1)
     // Normal n = normalize(TBN * ln)
 
+    Eigen::Vector3f n = normal;
+    float x = n.x(), y = n.y(), z = n.z();
+    Eigen::Vector3f t(x * y / sqrt(x * x + z * z), sqrt(x * x + z * z), z * y / sqrt(x * x + z * z));
+    Eigen::Vector3f b = n.cross(t);
+    Eigen::Matrix3f TBN;
+    TBN.col(0) = t;
+    TBN.col(1) = b;
+    TBN.col(2) = n;
 
-    Eigen::Vector3f result_color = { 0, 0, 0 };
-    result_color = normal;
+    int w = payload.texture->width;
+    int h = payload.texture->height;
+    float u = payload.tex_coords.x();
+    float v = payload.tex_coords.y();
+
+    auto huv = payload.texture->getColor(u, v).norm();
+    float dU = kh * kn * (payload.texture->getColor(u + 1.0f / w, v).norm() - huv);
+    float dV = kh * kn * (payload.texture->getColor(u, v + 1.0f / h).norm() - huv);
+
+    Vector3f ln(-dU, -dV, 1);
+    Eigen::Vector3f result_color = (TBN * ln).normalized();
 
     return result_color * 255.f;
 }
@@ -291,11 +339,16 @@ int main(int argc, const char** argv)
     bool command_line = false;
 
     std::string filename = "output.png";
+    std::string modelDir = "/home/nq/Documents/projects/learning/computerGraphics/src/games101/assignments/3/";
+
     objl::Loader Loader;
-    std::string obj_path = "/home/nq/Documents/projects/learning/computerGraphics/src/games101/assignments/3/models/spot/";
+    if (argc == 4) {
+        modelDir = std::string(argv[3]);
+    }
+    std::string obj_path = modelDir + "models/spot/";
 
     // Load .obj File
-    bool loadout = Loader.LoadFile("/home/nq/Documents/projects/learning/computerGraphics/src/games101/assignments/3/models/spot/spot_triangulated_good.obj");
+    bool loadout = Loader.LoadFile(modelDir + "models/spot/spot_triangulated_good.obj");
     for (auto mesh : Loader.LoadedMeshes)
     {
         for (int i = 0;i < mesh.Vertices.size();i += 3)
