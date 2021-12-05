@@ -1,5 +1,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <algorithm>
 
 #include "global.hpp"
 #include "rasterizer.hpp"
@@ -99,11 +100,10 @@ Eigen::Vector3f texture_fragment_shader(const fragment_shader_payload& payload)
     if (payload.texture)
     {
         // TODO: Get the texture value at the texture coordinates of the current fragment
-
+        return_color = payload.texture->getColor(payload.tex_coords.x(), payload.tex_coords.y());
     }
     Eigen::Vector3f texture_color;
     texture_color << return_color.x(), return_color.y(), return_color.z();
-
     Eigen::Vector3f ka = Eigen::Vector3f(0.005, 0.005, 0.005);
     Eigen::Vector3f kd = texture_color / 255.f;
     Eigen::Vector3f ks = Eigen::Vector3f(0.7937, 0.7937, 0.7937);
@@ -123,11 +123,26 @@ Eigen::Vector3f texture_fragment_shader(const fragment_shader_payload& payload)
 
     Eigen::Vector3f result_color = { 0, 0, 0 };
 
+    Eigen::Vector3f v = (eye_pos - point).normalized();
     for (auto& light : lights)
     {
+        Eigen::Vector3f specular(0, 0, 0);
+        Eigen::Vector3f ambient(0, 0, 0);
+        Eigen::Vector3f diffuse(0, 0, 0);
+        Eigen::Vector3f l = (light.position - point).normalized(),
+            h = (l + v).normalized();
+        float distance = (light.position - point).squaredNorm();
+        for (int i = 0;i < 3;i++) {
+            ambient[i] = ka[i] * amb_light_intensity[i];
+            diffuse[i] = kd[i] * (light.intensity[i] / distance) * std::max((float)0, (float)normal.dot(l));
+            specular[i] = ks[i] * (light.intensity[i] / distance) * std::pow(std::max((float)0, (float)normal.dot(h)), p);
+        }
         // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
         // components are. Then, accumulate that result on the *result_color* object.
 
+        result_color += ambient;
+        result_color += diffuse;
+        result_color += specular;
     }
 
     return result_color * 255.f;
@@ -153,11 +168,26 @@ Eigen::Vector3f phong_fragment_shader(const fragment_shader_payload& payload)
     Eigen::Vector3f normal = payload.normal;
 
     Eigen::Vector3f result_color = { 0, 0, 0 };
+    Eigen::Vector3f v = (eye_pos - point).normalized();
     for (auto& light : lights)
     {
+        Eigen::Vector3f specular(0, 0, 0);
+        Eigen::Vector3f ambient(0, 0, 0);
+        Eigen::Vector3f diffuse(0, 0, 0);
         // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
         // components are. Then, accumulate that result on the *result_color* object.
+        Eigen::Vector3f l = (light.position - point).normalized();
+        Eigen::Vector3f h = (v + l).normalized();
+        float rr = (light.position - point).squaredNorm();
 
+        for (int i = 0;i < 3;i++) {
+            specular[i] = ks[i] * (light.intensity[i] / rr) * std::pow(std::max((float)0.0, (float)normal.dot(h)), p);
+            ambient[i] = ka[i] * amb_light_intensity[i];
+            diffuse[i] = kd[i] * (light.intensity[i] / rr) * std::max((float)0, normal.dot(l));
+        }
+        result_color += diffuse;
+        result_color += ambient;
+        result_color += specular;
     }
 
     return result_color * 255.f;
