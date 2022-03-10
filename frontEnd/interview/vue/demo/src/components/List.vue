@@ -34,6 +34,7 @@ export default {
   methods: {
     deleteItem(title) {
       this.$emit("del", title);
+      this.$emit("addItem");
     },
   },
 };

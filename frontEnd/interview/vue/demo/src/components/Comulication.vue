@@ -7,6 +7,7 @@
 </template>
 <script>
 import ListItems from "./List.vue";
+// import {define} from "./event.js";
 export default {
   name: "ComunicationComponent",
   components: {
@@ -26,6 +27,15 @@ export default {
     delHandler(title) {
       this.event = this.event.filter((item) => item !== title);
     },
+    addItem() {
+      console.log("adding");
+    },
+  },
+  mounted() {
+    // this.$emit("addItem", this.addItem); // vue2 通过自定义事件实现兄弟间通信,vue3通过父组件或其他库来实现
+  },
+  beforeUnmount() {
+    // this.$off("addItem", this.addItem);
   },
 };
 </script>
