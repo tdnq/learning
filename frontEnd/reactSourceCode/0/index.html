@@ -15,8 +15,35 @@
     <script src="../../../node_modules/react-dom/umd/react-dom.development.js"></script>
     <!-- <script src="../../../node_modules/react/jsx-dev-runtime.js"></script> -->
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="../../../node_modules/redux/dist/redux.js"></script>
     <script type="text/babel">
         'use strict';
+        debugger;
+        const reducer = (state = 5, action) => {
+            if (action.type) {
+                return state;
+            } else {
+                return state;
+            }
+        }
+        const secondReducer = (state = 4, action) => {
+            return state;
+        }
+        const store = Redux.createStore(
+            Redux.combineReducers({reducer, secondReducer})
+        );
+        let state = store.getState();
+        const action = (payload) => ({
+            type: "LOGIN",
+            payload: payload
+        });
+        let count = 0;
+        store.subscribe(() => {
+            count++;
+            console.log(count)
+        })
+        store.dispatch(action());
+
         const Hello = React.forwardRef(
             function (props, ref) {
                 const [name, setName] = React.useState(0);
