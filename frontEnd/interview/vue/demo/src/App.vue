@@ -1,23 +1,49 @@
-/* eslint-disable vue/no-unused-components */
 <template>
   <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
   <!-- <HelloWorld isHiden msg="Welcome to Your Vue.js App" /> -->
-  <ComunicationComponent />
+  <!-- <ComunicationComponent /> -->
+  <Customize @changeName="changeName" :name="name" />
 </template>
 
 <script>
 import HelloWorld from "./components/HelloWorld.vue";
 import ComunicationComponent from "./components/Comulication.vue";
+import Customize from "./components/Customize.vue";
 
 export default {
   name: "App",
   components: {
     // eslint-disable-next-line vue/no-unused-components
     HelloWorld,
+    // eslint-disable-next-line vue/no-unused-components
     ComunicationComponent,
+    Customize,
+  },
+  methods: {
+    changeName() {
+      this.name += Math.random();
+    },
   },
   data() {
-    return { currentCom: "ComunicationComponent", comps: this.components };
+    return { name: "a" };
+  },
+  beforeCreate() {
+    console.log("father beforeCreate");
+  },
+  created() {
+    console.log("father create");
+  },
+  beforeUpdate() {
+    console.log("father beforeupdate");
+  },
+  updated() {
+    console.log("father updated");
+  },
+  beforeMount() {
+    console.log("father beforeMount");
+  },
+  mounted() {
+    console.log(" father mounted");
   },
 };
 </script>
