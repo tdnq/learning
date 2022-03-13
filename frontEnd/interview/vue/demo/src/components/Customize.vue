@@ -1,5 +1,8 @@
 <template>
-  <h1 @click="changeName">{{ name }}</h1>
+  <input
+    :value="modelValue"
+    @input="$emit('update:modelValue', $event.target.value)"
+  />
 </template>
 <script>
 export default {
@@ -10,8 +13,9 @@ export default {
   props: {
     name: {
       type: String,
-      default: "td",
+      default: "r",
     },
+    modelValue: String,
   },
   beforeCreate() {
     console.log("child beforeCreate");

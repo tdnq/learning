@@ -2,7 +2,8 @@
   <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
   <!-- <HelloWorld isHiden msg="Welcome to Your Vue.js App" /> -->
   <!-- <ComunicationComponent /> -->
-  <Customize @changeName="changeName" :name="name" />
+  <h1>{{ name }}</h1>
+  <Customize v-model="name" />
 </template>
 
 <script>
@@ -21,7 +22,7 @@ export default {
   },
   methods: {
     changeName() {
-      this.name += Math.random();
+      // this.name += Math.random();
     },
   },
   data() {
