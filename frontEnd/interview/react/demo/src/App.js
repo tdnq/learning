@@ -1,7 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import React from 'react';
-
+import SetStateExe from './components/SetStateExe';
 function App() {
   let [arr, setArr] = React.useState([
     {
@@ -33,6 +33,7 @@ function App() {
         temp.reverse();
         setArr(temp)
       }}>reverse</button>
+      <SetStateExe />
     </div>
   );
 }
