@@ -4,7 +4,7 @@
 // @version      0.1
 // @description  try to take over the world!
 // @author       You
-// @match        https://www.51fanzan.com/Task*
+// @match        www.51fanzan.com/Task*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -13,7 +13,7 @@
 
 (function () {
     'use strict';
-    const tarUrl = 'www.51fanzan.com/Task/taskPublish.html';
+    const tarUrl = 'www.51fanzan.com/Task/add.html';
     if (!location.href.includes(tarUrl)) {
         return;
     }
@@ -47,8 +47,8 @@
                     background-color: #e8e2ef;
             }
             .autoScript_main>div>button {
-                margin-top: 1rem;
-                margin-left: auto;
+                float: right;
+                margin: 20px 10px 0;
             }
     ` );
     root.innerHTML = `
@@ -58,20 +58,20 @@
         <input value='${DateData.year}-${DateData.mouth}-${DateData.day}' id='autoScript_date' type="text">
         <br />
          <label>时间:</label>
-        <select value='10:00' id='autoScript_time'>
-             <option value="10:00">10:00</option>
-             <option value="14:00">14:00</option>
-             <option value="20:00">20:00</option>
-        </select>
+        <input value='10:00' id='autoScript_time'>
         <br />
         <label>间隔:</label>
         <input id='autoScript_interval' value='30' type="number">
         <br />
+        <label>期数:</label>
+        <input value = '${5}' id='customItem' type="number">
+        <br />
         <label>份数:</label>
         <input value = '${1}' id='autoScript_num' type="number">
         <br />
-        <div style="display: flex;">
-           <button>确认</button>
+        <div>
+           <button id="clear">清空</button>
+           <button id = 'confirm'>确认</button>
        </div>
        <div class='info' style="color: red" ></div>
     </div>
@@ -79,23 +79,31 @@
     document.body.appendChild(root);
 
     // event listen
-    document.querySelector(".autoScript_main button").addEventListener('click', function () {
+    document.querySelector(".autoScript_main button#confirm").addEventListener('click', function () {
         document.querySelector(".autoScript_main>.info").textContent = "";
         let values = {};
         tar.forEach((item, index) => {
             values[item] = document.querySelector(`#autoScript_${item}`).value;
         });
-        fillData(values);
+        let prevLen = document.querySelectorAll('.step_block.batch_box>div>.batch_fs_box').length;
+        for (let i = 0; i < document.querySelector('#customItem').value - 0; i++) {
+            document.querySelector('.step_block.batch_box .release_btn').click();
+        }
+        fillData(values, prevLen);
+    })
+    document.querySelector(".autoScript_main button#clear").addEventListener('click', function () {
+        document.querySelectorAll('.step_block.batch_box>div>.batch_fs_box .delete_btn').forEach(item => {
+            item.click();
+        })
     })
 
-
-    function fillData(data) {
+    function fillData(data, prevLen) {
         data.time = new Date(parseInt(DateData.year), parseInt(DateData.mouth), parseInt(DateData.day), parseInt(data.time.split(':')[0]), parseInt(data.time.split(':')[1]));
-        const eleItems = document.querySelectorAll('.step_block.batch_box>.batch_fs_box');
+        const eleItems = document.querySelectorAll('.step_block.batch_box>div>.batch_fs_box');
 
         let interval = parseInt(document.querySelector(`#autoScript_${'interval'}`).value);
-        for (let i = 0; i < eleItems.length; i++) {
-            let tempDate = new Date(data.time.getTime() + i * interval * 60 * 1000);
+        for (let i = prevLen; i < eleItems.length; i++) {
+            let tempDate = new Date(data.time.getTime() + (i - prevLen) * interval * 60 * 1000);
             tar.forEach((item, index) => {
                 let val = data[item];
                 if (item === 'time') {
