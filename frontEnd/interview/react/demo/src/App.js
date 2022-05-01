@@ -15,6 +15,9 @@ function App() {
       color: 'blue'
     }
   ]);
+  const change = function (item) {
+    console.log('fa'); //react是合成事件
+  }
   // key 是为了标识组件是重建还是复用,最好用业务数据标识key,如果用index作key可能会导致操作与vdom执行不一致.
   return (
     <div className="App">
@@ -23,7 +26,7 @@ function App() {
           arr.map((item, index) => {
             return <div key={item.id}>
               <li style={{ color: item.color }} >{item.name}</li>
-              <input type="checkbox" />
+              <input onChange={change} type="checkbox" />
             </div>
           })
         }
