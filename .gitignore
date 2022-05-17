@@ -1,8 +1,10 @@
 *.out
 *.exe
-node_modules/*
+node_modules
 .vscode
 build
+tools/excel_progress/src/data
+
 #os files
 *.img
 *.bin
