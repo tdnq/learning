@@ -26,11 +26,27 @@ async function getExtractData(sourceData, dataFileName, unitPriceData) {
         let itemSource = sourceData[item].find(item => item.name === '日耗表') //日料表数据;
         if (!itemSource) {
             if (!item.startsWith('.~')) {
-                console.log(item, '这个表没有日耗表');
+                console.log(['这个表没有日耗表', item].join('--'));
             }
             return;
         }
         let department = itemSource.data[1][0] === '部门' ? itemSource.data[1][1] : null; //部门
+        let codeIndex = itemSource.data[2].indexOf('存货编码');
+        let currentDayHappenCountIndex = itemSource.data[2].indexOf(`${dateData[2]}日`);
+        if (codeIndex === -1) {
+            console.log(['没有编码', item].join('--'));
+            return;
+        }
+        if (currentDayHappenCountIndex === -1) {
+            let temp = itemSource.data[0].indexOf(`${dateData[2]}`);
+            if (temp === -1) {
+                console.log(['没有当日发生数', item].join('--'));
+                return;
+            } else {
+                currentDayHappenCountIndex = temp;
+                console.log(['当日发生数名称栏不规范', item].join('--'));
+            }
+        }
         {
             data[item] = { data: [], name: `${department}_日耗表` }
             let startIndex = 3;
@@ -39,12 +55,6 @@ async function getExtractData(sourceData, dataFileName, unitPriceData) {
                     continue;
                 }
                 let rowData = null;
-                let codeIndex = itemSource.data[2].indexOf('存货编码');
-                let currentDayHappenCountIndex = itemSource.data[0].indexOf(`${dateData[2]}日`);
-                if (!(codeIndex > -1 && currentDayHappenCountIndex > -1)) {
-                    console.log('物料单价表好像有问题');
-                    continue;
-                }
                 if (department === '酒吧部') {
                     rowData = [
                         ...dateData, //'年', '月', '日'
@@ -100,7 +110,7 @@ async function getUnitPriceData(sourceData, dataFileName) {
     dataFileName.forEach(item => {
         let itemSource = sourceData[item].find(item => item.name === '物料单价表') //日料表数据;
         if (itemSource) {
-            console.log(item, '物料单价表在这里!');
+            console.log(['物料单价表在这里!', item].join('--'));
         } else {
             return;
         }
@@ -108,12 +118,18 @@ async function getUnitPriceData(sourceData, dataFileName) {
         let codeIndex = itemSource.data[0].indexOf('编号');
         let unitPriceIndex = itemSource.data[0].indexOf('单价');
         if (!(codeIndex > -1 && unitPriceIndex > -1)) {
-            console.log('物料单价表好像有问题,', item, ',', i);
+            console.log(['物料单价表好像有问题,', item].join('--'));
             return;
         }
         for (let i = 1; i < itemSource.data.length; i++) {
             if (!itemSource.data[i][codeIndex]) {
                 continue;
+            }
+            if (itemSource.data[i][codeIndex] === null) {
+                console.log(['这一项没有编码', item, '序号', itemSource.data[i][0]].join('--'))
+            }
+            if (itemSource.data[i][unitPriceIndex] === null) {
+                console.log(['这一项没有单价', item, '序号', itemSource.data[i][0]].join('--'))
             }
             data[itemSource.data[i][codeIndex]] = itemSource.data[i][unitPriceIndex]
         }
@@ -122,7 +138,7 @@ async function getUnitPriceData(sourceData, dataFileName) {
 }
 async function main() {
     const tarDir = path.join(__dirname, dataDir);
-    const excludeFiles = ['5月收支表及日耗.xlsx'];
+    const excludeFiles = []; //非数据日耗文件
     const allFileNames = fs.readdirSync(tarDir);
     const dataFileName = allFileNames.filter(item => {
         return !excludeFiles.includes(item);
