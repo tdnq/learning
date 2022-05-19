@@ -11,6 +11,7 @@ const dateData = [
     date.getDate()
 ]
 async function getAllData(dir = []) {
+    console.log('正在读取excel数据....');
     let data = {};
     dir.forEach(item => {
         let itemData = xlsx.parse(fs.readFileSync(path.join(__dirname, dataDir, item)));
@@ -18,12 +19,12 @@ async function getAllData(dir = []) {
     });
     return data;
 }
-async function getExtractData(sourceData, dataFileName) {
+async function getExtractData(sourceData, dataFileName, unitPriceData) {
+    console.log('正在提取日耗表数据....')
     let data = {};
     dataFileName.forEach(item => {
         let itemSource = sourceData[item].find(item => item.name === '日耗表') //日料表数据;
         if (!itemSource) {
-            String.prototype.startsWith
             if (!item.startsWith('.~')) {
                 console.log(item, '这个表没有日耗表');
             }
@@ -34,17 +35,43 @@ async function getExtractData(sourceData, dataFileName) {
             data[item] = { data: [], name: `${department}_日耗表` }
             let startIndex = 3;
             for (let i = startIndex; i < itemSource.data.length; i++) {
-                let rowData = [
-                    ...dateData, //'年', '月', '日'
-                    department, // 部门
-                    itemSource.data[i][1], //大类
-                    itemSource.data[i][2], //存货名称
-                    itemSource.data[i][4], //存货编码
-                    '', //名称
-                    '', //规格
-                    '', //计量单位
-                    parseInt(itemSource.data[i][6]) //当日发生数
-                ];
+                if (!itemSource.data[i] || !itemSource.data[i].length || !(itemSource.data[i][1] || itemSource.data[i][2])) {
+                    continue;
+                }
+                let rowData = null;
+                let codeIndex = itemSource.data[2].indexOf('存货编码');
+                let currentDayHappenCountIndex = itemSource.data[0].indexOf(`${dateData[2]}日`);
+                if (!(codeIndex > -1 && currentDayHappenCountIndex > -1)) {
+                    console.log('物料单价表好像有问题');
+                    continue;
+                }
+                if (department === '酒吧部') {
+                    rowData = [
+                        ...dateData, //'年', '月', '日'
+                        department, // 部门
+                        itemSource.data[i][1], //大类
+                        itemSource.data[i][3], //存货名称
+                        itemSource.data[i][5], //存货编码
+                        '', //名称
+                        '', //规格
+                        '', //计量单位
+                        parseInt(itemSource.data[i][currentDayHappenCountIndex]), //当日发生数
+                        unitPriceData[itemSource.data[i][codeIndex]] //单价
+                    ];
+                } else {
+                    rowData = [
+                        ...dateData, //'年', '月', '日'
+                        department, // 部门
+                        itemSource.data[i][1], //大类
+                        itemSource.data[i][2], //存货名称
+                        itemSource.data[i][4], //存货编码
+                        '', //名称
+                        '', //规格
+                        '', //计量单位
+                        parseInt(itemSource.data[i][currentDayHappenCountIndex]), //当日发生数
+                        unitPriceData[itemSource.data[i][codeIndex]] //单价
+                    ];
+                }
                 let countIndex = 10;
                 if (isNaN(rowData[countIndex])) {
                     rowData[countIndex] = 0;
@@ -58,7 +85,7 @@ async function getExtractData(sourceData, dataFileName) {
 async function buildExcel(extractData) {
     let buildData = []
     Object.keys(extractData).map(key => {
-        extractData[key].data.unshift(['年', '月', '日', '部门', '大类', '存货名称', '存货编码', '名称', '规格', '计量单位', '当日发生数'])
+        extractData[key].data.unshift(['年', '月', '日', '部门', '大类', '存货名称', '存货编码', '名称', '规格', '计量单位', '当日发生数', '单价'])
         return buildData.push(extractData[key]);
     });
     // const sheetOptions = { '!cols': [{ wch: 6 }, { wch: 7 }, { wch: 10 }, { wch: 20 }] };
@@ -66,6 +93,32 @@ async function buildExcel(extractData) {
     let buffer = xlsx.build(buildData, {}); // Returns a buffer
     fs.writeFileSync(path.join(__dirname, `./build/${dateData.join('_')}_各部门日耗表.xlsx`), buffer);
     console.log('-----生成日耗表成功!!');
+}
+async function getUnitPriceData(sourceData, dataFileName) {
+    console.log('正在提取单价数据....')
+    let data = {};
+    dataFileName.forEach(item => {
+        let itemSource = sourceData[item].find(item => item.name === '物料单价表') //日料表数据;
+        if (itemSource) {
+            console.log(item, '物料单价表在这里!');
+        } else {
+            return;
+        }
+
+        let codeIndex = itemSource.data[0].indexOf('编号');
+        let unitPriceIndex = itemSource.data[0].indexOf('单价');
+        if (!(codeIndex > -1 && unitPriceIndex > -1)) {
+            console.log('物料单价表好像有问题,', item, ',', i);
+            return;
+        }
+        for (let i = 1; i < itemSource.data.length; i++) {
+            if (!itemSource.data[i][codeIndex]) {
+                continue;
+            }
+            data[itemSource.data[i][codeIndex]] = itemSource.data[i][unitPriceIndex]
+        }
+    });
+    return data;
 }
 async function main() {
     const tarDir = path.join(__dirname, dataDir);
@@ -78,8 +131,10 @@ async function main() {
     const sourceData = {};
     dataFileName.forEach(item => {
         sourceData[item] = JSON.parse(JSON.stringify(excelData[item]));
-    }) // 需要提取表的数据
-    let extractData = await getExtractData(sourceData, dataFileName);
+    }); // 需要提取表的数据
+    let unitPriceData = await getUnitPriceData(sourceData, dataFileName);
+
+    let extractData = await getExtractData(sourceData, dataFileName, unitPriceData);
 
     await buildExcel(extractData);
 }
