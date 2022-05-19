@@ -1,7 +1,6 @@
 const xlsx = require('node-xlsx');
 const path = require('path');
 const fs = require('fs-extra');
-const { data } = require('jquery');
 
 const dataDir = './data';
 const date = new Date();
