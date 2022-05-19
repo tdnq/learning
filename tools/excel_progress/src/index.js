@@ -1,6 +1,7 @@
 const xlsx = require('node-xlsx');
 const path = require('path');
 const fs = require('fs-extra');
+const { isGetSum } = require('./config.js');
 
 const dataDir = './data';
 const date = new Date();
@@ -8,7 +9,7 @@ const dateData = [
     date.getFullYear(),
     date.getMonth() + 1,
     date.getDate()
-]
+];
 async function getAllData(dir = []) {
     console.log('正在读取excel数据....');
     let data = {};
@@ -64,7 +65,7 @@ async function getExtractData(sourceData, dataFileName, unitPriceData) {
                         '', //名称
                         '', //规格
                         '', //计量单位
-                        parseInt(itemSource.data[i][currentDayHappenCountIndex]), //当日发生数
+                        parseFloat(itemSource.data[i][currentDayHappenCountIndex]), //当日发生数
                         unitPriceData[itemSource.data[i][codeIndex]] //单价
                     ];
                 } else {
@@ -77,13 +78,24 @@ async function getExtractData(sourceData, dataFileName, unitPriceData) {
                         '', //名称
                         '', //规格
                         '', //计量单位
-                        parseInt(itemSource.data[i][currentDayHappenCountIndex]), //当日发生数
+                        parseFloat(itemSource.data[i][currentDayHappenCountIndex]), //当日发生数
                         unitPriceData[itemSource.data[i][codeIndex]] //单价
                     ];
                 }
                 let countIndex = 10;
                 if (isNaN(rowData[countIndex])) {
                     rowData[countIndex] = 0;
+                }
+                if (isNaN(parseFloat(unitPriceData[itemSource.data[i][codeIndex]]))) {
+                    console.log(['这个编号的单价不存在', itemSource.data[i][codeIndex]].join('--'));
+                }
+                if (isGetSum) {
+                    try {
+                        rowData.push(rowData[rowData.length - 1] * rowData[rowData.length - 2]);
+                    } catch (error) {
+                        rowData.push(0);
+                        console.log(['发生了一个计算错误', item, '序号', itemSource.data[i][0]].join('--'));
+                    }
                 }
                 data[item].data.push(rowData);
             }
@@ -94,7 +106,11 @@ async function getExtractData(sourceData, dataFileName, unitPriceData) {
 async function buildExcel(extractData) {
     let buildData = []
     Object.keys(extractData).map(key => {
-        extractData[key].data.unshift(['年', '月', '日', '部门', '大类', '存货名称', '存货编码', '名称', '规格', '计量单位', '当日发生数', '单价'])
+        let cols = ['年', '月', '日', '部门', '大类', '存货名称', '存货编码', '名称', '规格', '计量单位', '当日发生数', '单价'];
+        if (isGetSum) {
+            cols.push('成本小计');
+        }
+        extractData[key].data.unshift(cols);
         return buildData.push(extractData[key]);
     });
     // const sheetOptions = { '!cols': [{ wch: 6 }, { wch: 7 }, { wch: 10 }, { wch: 20 }] };
@@ -104,7 +120,7 @@ async function buildExcel(extractData) {
     console.log('-----生成日耗表成功!!');
 }
 async function getUnitPriceData(sourceData, dataFileName) {
-    console.log('正在提取单价数据....')
+    console.log('正在提取单价数据....');
     let data = {};
     dataFileName.forEach(item => {
         let itemSource = sourceData[item].find(item => item.name === '物料单价表') //日料表数据;
@@ -128,7 +144,7 @@ async function getUnitPriceData(sourceData, dataFileName) {
             if (itemSource.data[i][unitPriceIndex] === null) {
                 console.log(['这一项没有单价', item, '序号', itemSource.data[i][0]].join('--'))
             }
-            data[itemSource.data[i][codeIndex]] = itemSource.data[i][unitPriceIndex]
+            data[itemSource.data[i][codeIndex]] = parseFloat(itemSource.data[i][unitPriceIndex]);
         }
     });
     return data;
@@ -151,4 +167,8 @@ async function main() {
 
     await buildExcel(extractData);
 }
-main();
+try {
+    main();
+} catch (error) {
+    console.log(error);
+}
