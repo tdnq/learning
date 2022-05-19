@@ -122,11 +122,9 @@ async function getUnitPriceData(sourceData, dataFileName) {
             return;
         }
         for (let i = 1; i < itemSource.data.length; i++) {
-            if (!itemSource.data[i][codeIndex]) {
-                continue;
-            }
             if (itemSource.data[i][codeIndex] === null) {
                 console.log(['这一项没有编码', item, '序号', itemSource.data[i][0]].join('--'))
+                continue;
             }
             if (itemSource.data[i][unitPriceIndex] === null) {
                 console.log(['这一项没有单价', item, '序号', itemSource.data[i][0]].join('--'))
