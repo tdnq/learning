@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <ul class="hello">
+        <li>1</li>
+        <span>2</span>
+        <li>3</li>
+        <li>4</li>
+        <li>5</li>
+    </ul>
+    <main>
+        <h1>hello</h1>
+    </main>
+    <script type="text/javascript">
+        let tar = document.querySelector(".hello");
+        function reverseList(ele) {
+            let len = ele.childNodes.length;
+            while (len-- > 0) {
+                tar.appendChild(tar.childNodes[len]);
+            }
+        }
+        // reverseList(tar);
+        tar.appendChild(document.querySelector("h1"));
+    </script>
+</body>
+
+</html>
