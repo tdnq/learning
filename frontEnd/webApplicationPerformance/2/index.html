@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>Document</title>
+</head>
+<body>
+    <main>
+        <div>hello</div>
+        <div>hello</div>
+        <div>hello</div>
+        <div>hello</div>
+    </main>
+    <script>
+        window.addEventListener("load",function(){
+            let ele = document.getElementsByTagName("div");
+            for(let e=0;e<ele.length;e++){
+                let width=ele[e].style.width ||1000;
+                ele[e].style.width=width-800 +'px';
+            }
+        })
+    </script>
+</body>
+</html>

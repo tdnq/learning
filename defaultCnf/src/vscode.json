@@ -1,0 +1,19 @@
+{
+    "git.autofetch": true,
+    "explorer.confirmDelete": false,
+    "debug.onTaskErrors": "showErrors",
+    "vim.insertModeKeyBindings": [
+        {
+            "before": [
+                "q",
+                "q"
+            ],
+            "after": [
+                "<Esc>"
+            ]
+        }
+    ],
+    "vim.surround": true,
+    "vim.easymotion": true,
+    "C_Cpp.updateChannel": "Insiders"
+}
