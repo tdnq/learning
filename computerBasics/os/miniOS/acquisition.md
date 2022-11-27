@@ -1,1 +1,0 @@
-1. Windows:NTFS is better that FAT because it must start from the first chunk to find a chunk in FAT.
