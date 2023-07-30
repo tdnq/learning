@@ -27,6 +27,7 @@ export default {
 }
 
 .demo .btn {
+
     font-size: 20px;
     padding: 0 10px;
     height: 32px;
