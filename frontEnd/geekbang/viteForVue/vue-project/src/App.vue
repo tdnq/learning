@@ -9,6 +9,8 @@ import { RouterLink, RouterView } from 'vue-router'
         <RouterLink to="/basic">basic</RouterLink>
         <br />
         <RouterLink to="/todo">todo</RouterLink>
+        <br />
+        <RouterLink to="/vuex">vuex</RouterLink>
       </nav>
     </div>
   </header>
