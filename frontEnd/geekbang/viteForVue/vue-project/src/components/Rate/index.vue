@@ -11,3 +11,8 @@ let rate = computed(() => "★★★★★☆☆☆☆☆".slice(5 - props.value
         {{ rate }}
     </div>
 </template>
+<script>
+export default {
+    name: 'Rate'
+}
+</script>

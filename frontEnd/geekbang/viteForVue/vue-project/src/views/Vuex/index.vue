@@ -1,14 +1,18 @@
 <script setup>
-import { useStore } from 'vuex';
 import Rate from '@/components/Rate/index.vue';
-const store = useStore();
+import { Button } from 'ant-design-vue';
+import { ref } from 'vue'
+
+const data = ref({
+    name: '1b'
+})
 const changeAppName = () => {
-    store.commit('app/change', 'faf')
+    data.value.name = '2323';
 }
 </script>
 <template>
-    <h2>app name is : {{ $store.state.app.name }}</h2>
-    <button @click="changeAppName">change</button>
+    <h2>app name is : {{ data.name }}</h2>
+    <Button @click="changeAppName">change name</Button>
     <div>
         <Rate :value="3" />
         <Rate :value="2" color="blue" />
