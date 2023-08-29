@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="root">
+
+    </div>
+    <script src="../../../node_modules/react/umd/react.development.js"></script>
+    <script src="../../../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <!-- <script src="../../../node_modules/react/jsx-dev-runtime.js"></script> -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="../../../node_modules/redux/dist/redux.js"></script>
+    <script type="text/babel">
+        'use strict';
+        function Hello() {
+            let [num, setNum] = React.useState(0);
+            if (num) {
+                React.useState(2)
+            }
+            let [isPendig, startTransition] = React.useTransition({ timeutMs: 300 })
+            React.useEffect(() => {
+                let id = setInterval(() => {
+                    startTransition(() => {
+                        setNum((pre) => pre + 1)
+                    })
+                }, 100);
+                return () => clearInterval(id);
+            }, [setNum])
+
+            return <h1>hello,{num}</h1>;
+        }
+
+
+
+        const domContainer = document.querySelector('#root');
+        let app = ReactDOM.createRoot(domContainer)
+        app.render(<Hello />);
+        // ReactDOM.render(<Hello />, domContainer)
+
+    </script>
+</body>
+
+</html>
